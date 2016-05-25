@@ -1,8 +1,7 @@
 import pandas as pd
 
 # local functions/processors
-import processors.loader as loader
-import processors.feature_extractor as extractor
+from processors import loader, feature_extractor as extractor
 
 training_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/train.csv")
 test_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test.csv")
