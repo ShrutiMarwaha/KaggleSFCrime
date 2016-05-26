@@ -3,6 +3,7 @@ import pandas as pd
 from processors import loader
 from processors import feature_extractor as extractor
 from processors import feature_engineering as engineering
+from sklearn import preprocessing
 
 # load data
 training_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/train.csv")
@@ -26,7 +27,7 @@ test_striped_time = extractor.extract_date_dataframe(test_set.Dates)
 # feature engineering
 training_zipcodes = training_set.apply(lambda d: engineering.closest_zipcode(d["X"],d["Y"]), axis=1)
 training_zipcodes.name = "zip"
-len(training_zipcodes.unique())
+print len(training_zipcodes.unique())
 
 test_zipcodes = test_set.apply(lambda d: engineering.closest_zipcode(d["X"],d["Y"]), axis=1)
 test_zipcodes.name = "zip"
@@ -45,3 +46,18 @@ print "after features extraction - training datatest data: \n %s \n" % test_feat
 # load training set features
 # training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
 
+# Create Dummy Variables from Categorical Data
+
+le_class = preprocessing.LabelEncoder()
+crime = le_class.fit_transform(training_features.Category)
+
+x = training_features.head()
+x = x.drop("Category", axis=1)
+x.dtypes
+# since all columns should be categorial, convert their type to categorical
+for i in x.columns:
+            x[i] = x[i].astype('category')
+x.dtypes
+
+# create dummy variables for each categorical data
+y = pd.get_dummies(x)
