@@ -3,7 +3,7 @@ from scipy.spatial import distance
 
 zcdb = ZipCodeDatabase()
 sf_zipcodes = zcdb.find_zip(city="San Francisco", state="CA")
-print(len(sf_zipcodes))
+# print(len(sf_zipcodes))
 
 def closest_zipcode(input_longitude,input_latitude):
     """
