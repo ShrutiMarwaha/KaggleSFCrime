@@ -1,8 +1,11 @@
 import pandas as pd
+from sklearn import preprocessing
 # local functions/processors
 from processors import loader
 from processors import feature_extractor as extractor
 from processors import feature_engineering as engineering
+from processors import modeling
+
 
 # load data
 training_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/train.csv")
@@ -26,7 +29,7 @@ test_striped_time = extractor.extract_date_dataframe(test_set.Dates)
 # feature engineering
 training_zipcodes = training_set.apply(lambda d: engineering.closest_zipcode(d["X"],d["Y"]), axis=1)
 training_zipcodes.name = "zip"
-len(training_zipcodes.unique())
+print len(training_zipcodes.unique())
 
 test_zipcodes = test_set.apply(lambda d: engineering.closest_zipcode(d["X"],d["Y"]), axis=1)
 test_zipcodes.name = "zip"
@@ -44,4 +47,22 @@ print "after features extraction - training datatest data: \n %s \n" % test_feat
 
 # load training set features
 # training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
+
+# Create Dummy Variables from Categorical Data
+# remove outcomes, keep features only
+training_features2 = training_features.drop("Category", axis=1)
+training_features2.dtypes
+# decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
+categorical_columns = training_features2.columns.tolist()
+
+training_dummy_var = modeling.create_dummy_var(training_features2,categorical_columns)
+
+print "compare number of features earlier: %s, now: %s" % training_features2.shape[1], training_dummy_var.shape[1]
+print training_dummy_var.columns.tolist()
+print training_dummy_var.head()
+
+
+
+le_class = preprocessing.LabelEncoder()
+crime = le_class.fit_transform(training_features.Category)
 
