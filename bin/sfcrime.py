@@ -1,4 +1,13 @@
 import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn import svm
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.grid_search import GridSearchCV
+from sklearn import cross_validation
+from sklearn import metrics
+
 from sklearn import preprocessing
 # local functions/processors
 from processors import loader
@@ -57,19 +66,12 @@ categorical_columns = training_features2.columns.tolist()
 
 training_dummy_var = modeling.create_dummy_var(training_features2,categorical_columns)
 
-print "compare number of features earlier: %s, now: %s" % training_features2.shape[1], training_dummy_var.shape[1]
+print "compare number of features earlier: %s, now: %s" % (training_features2.shape[1], training_dummy_var.shape[1])
 print training_dummy_var.columns.tolist()
 print training_dummy_var.head()
 
 le_class = preprocessing.LabelEncoder()
 crime = le_class.fit_transform(training_features.Category)
-x = training_features.head()
-x = x.drop("Category", axis=1)
-x.dtypes
-# since all columns should be categorial, convert their type to categorical
-for i in x.columns:
-            x[i] = x[i].astype('category')
-x.dtypes
 
-# create dummy variables for each categorical data
-y = pd.get_dummies(x)
+
+
