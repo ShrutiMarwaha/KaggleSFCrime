@@ -73,6 +73,7 @@ outcomes = training_features.Category
 # convert outcome classes from string to numeric
 # le_class = preprocessing.LabelEncoder()
 # outcomes = le_class.fit_transform(training_features.Category)
+# outcomes = pd.Series(outcomes)
 outcomes.shape
 outcomes_frequency = outcomes.value_counts(ascending=True)
 outcomes_frequency.head()
