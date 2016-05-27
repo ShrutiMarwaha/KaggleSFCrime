@@ -12,6 +12,7 @@ from sklearn import preprocessing
 
 # import local functions/processors
 from processors import loader
+import analysis
 from processors import feature_extractor as extractor
 from processors import feature_engineering as engineering
 from processors import modeling
@@ -21,15 +22,8 @@ training_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/Mac
 test_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test.csv")
 
 # data exploration
-print "training set: \n %s \n" % training_set.head()
-print "dimension of training set: %s \n" % (training_set.shape,)
-print "dimension of training set without missing data %s \n" %  (training_set.dropna().shape,)
-print "column names of training set: %s \n" % training_set.columns
-print "first 5 rows of column Category of training set: \n %s \n" % training_set.Category.head()
-#print training_set.Category.value_counts()
-
-print "dimension of test data: %s \n" % (test_set.shape,)
-print "test data: \n %s \n" % test_set.head()
+analysis.data_summary(training_set)
+analysis.data_summary(test_set)
 
 # feature extraction
 training_striped_time = extractor.extract_date_dataframe(training_set.Dates)
@@ -38,7 +32,7 @@ test_striped_time = extractor.extract_date_dataframe(test_set.Dates)
 # feature engineering
 training_zipcodes = training_set.apply(lambda d: engineering.closest_zipcode(d["X"],d["Y"]), axis=1)
 training_zipcodes.name = "zip"
-print len(training_zipcodes.unique())
+# print len(training_zipcodes.unique())
 
 test_zipcodes = test_set.apply(lambda d: engineering.closest_zipcode(d["X"],d["Y"]), axis=1)
 test_zipcodes.name = "zip"
