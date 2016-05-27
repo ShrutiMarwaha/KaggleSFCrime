@@ -98,6 +98,8 @@ model.fit(features_train, outcomes_train)
 # make predictions
 expected = outcomes_test
 predicted = model.predict(features_test)
+print "true values: \n%s" % expected[:6]
+print "predicted values: %s" % predicted[:6]
 
 # summarize the fit of the model
 print(metrics.classification_report(expected, predicted))
@@ -111,6 +113,7 @@ print(metrics.accuracy_score(expected, predicted))
 outcomes_frequency.head()
 outcomes_frequency[outcomes_frequency < 10 ]
 matchings_indices = [ i for i, value in enumerate(outcomes) if value == "TREA" ]
+# matchings_indices = [ i for i, value in enumerate(outcomes) if value == 33 ] #if outcomes very converted to numeric
 # for i, value in enumerate(outcomes):
 #             if value == "TREA":
 #                 print i
@@ -170,5 +173,6 @@ predicted = model.predict(cv_features_validation)
 # summarize the fit of the model
 print(metrics.classification_report(expected, predicted))
 print(metrics.confusion_matrix(expected, predicted))
+
 
 
