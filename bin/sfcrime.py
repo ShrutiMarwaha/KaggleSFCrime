@@ -1,3 +1,4 @@
+# import libraries
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -5,11 +6,11 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn import svm
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.grid_search import GridSearchCV
-from sklearn import cross_validation
+from sklearn import cross_validation as cv
 from sklearn import metrics
-
 from sklearn import preprocessing
-# local functions/processors
+
+# import local functions/processors
 from processors import loader
 from processors import feature_extractor as extractor
 from processors import feature_engineering as engineering
@@ -65,13 +66,40 @@ training_features2.dtypes
 categorical_columns = training_features2.columns.tolist()
 
 training_dummy_var = modeling.create_dummy_var(training_features2,categorical_columns)
-
 print "compare number of features earlier: %s, now: %s" % (training_features2.shape[1], training_dummy_var.shape[1])
 print training_dummy_var.columns.tolist()
 print training_dummy_var.head()
 
-le_class = preprocessing.LabelEncoder()
-crime = le_class.fit_transform(training_features.Category)
+outcomes = training_features.Category
+# convert outcome classes from string to numeric
+# le_class = preprocessing.LabelEncoder()
+# outcomes = le_class.fit_transform(training_features.Category)
 
+# divide data in to training and intermediate set
+features_train, features_intermediate, outcomes_train, outcomes_intermediate = cv.train_test_split(training_dummy_var,outcomes,test_size=0.4,random_state=0)
+# divide intermediate set into test and validation set.
+# validation set will be only used once to evaluate final model's performance
+features_test, features_validation, outcomes_test, outcomes_validation = cv.train_test_split(features_intermediate,outcomes_intermediate,test_size=0.5,random_state=0)
+print(features_train.shape)
+print(features_test.shape)
+print(features_validation.shape)
+
+# build the model
+model = LogisticRegression(n_jobs=-1,random_state=0)
+#model = RandomForestClassifier(n_jobs=-1,random_state=0)
+#model = BernoulliNB()
+#model = SVC() # donot try, takes very very long
+#model= GradientBoostingClassifier(random_state=0) # takes very long
+model.fit(features_train, outcomes_train)
+
+# make predictions
+expected = outcomes_test
+predicted = model.predict(features_test)
+
+# summarize the fit of the model
+print(metrics.classification_report(expected, predicted))
+print(metrics.confusion_matrix(expected, predicted))
+print(metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
+print(metrics.accuracy_score(expected, predicted))
 
 
