@@ -3,7 +3,7 @@ import pandas as pd
 def load_csv_data(filename,n_rows=None):
     """
     reads csv file and returns data-frame using pandas
-    :param filename: csv file
+    :param filename: csv file with path name
     :return: data-frame (pandas)
     """
 
