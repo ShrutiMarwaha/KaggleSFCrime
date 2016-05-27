@@ -5,7 +5,7 @@ from processors import loader
 from processors import feature_extractor as extractor
 from processors import feature_engineering as engineering
 from processors import modeling
-
+from sklearn import preprocessing
 
 # load data
 training_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/train.csv")
@@ -61,8 +61,15 @@ print "compare number of features earlier: %s, now: %s" % training_features2.sha
 print training_dummy_var.columns.tolist()
 print training_dummy_var.head()
 
-
-
 le_class = preprocessing.LabelEncoder()
 crime = le_class.fit_transform(training_features.Category)
+x = training_features.head()
+x = x.drop("Category", axis=1)
+x.dtypes
+# since all columns should be categorial, convert their type to categorical
+for i in x.columns:
+            x[i] = x[i].astype('category')
+x.dtypes
 
+# create dummy variables for each categorical data
+y = pd.get_dummies(x)
