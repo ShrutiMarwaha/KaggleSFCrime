@@ -1,3 +1,10 @@
+# import local functions/processors
+from processors import loader
+import analysis
+from processors import feature_extractor as extractor
+from processors import feature_engineering as engineering
+from processors import modeling
+
 # import libraries
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -8,13 +15,6 @@ from sklearn import grid_search as gs
 from sklearn import cross_validation as cv
 from sklearn import metrics
 from sklearn import preprocessing
-
-# import local functions/processors
-from processors import loader
-import analysis
-from processors import feature_extractor as extractor
-from processors import feature_engineering as engineering
-from processors import modeling
 
 # load data
 training_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/train.csv")
