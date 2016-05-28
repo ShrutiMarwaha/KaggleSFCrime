@@ -5,7 +5,7 @@ zcdb = ZipCodeDatabase()
 sf_zipcodes = zcdb.find_zip(city="San Francisco", state="CA")
 # print(len(sf_zipcodes))
 
-def closest_zipcode(input_longitude,input_latitude):
+def long_lat_to_zipcode(input_longitude,input_latitude):
     """
     function to convert latitude and longitude to zipcode:
     find euclidean distance between user provided latitude and longitude and
@@ -37,4 +37,15 @@ def closest_zipcode(input_longitude,input_latitude):
 
     return closest_zip
 
-# closest_zipcode(-122.4033, 37.71343)
+# long_lat_to_zipcode(-122.4033, 37.71343)
+
+def find_zipcodes_dataframe(df,long_col,lat_col):
+    '''
+    function that applies long_lat_to_zipcode function to all rows of dataframe and returns a data frame
+    :param df: data frame
+    :param long_col: column name that contains longitude
+    :param lat_col: column name that contains latitude
+    :return: original data frame with additional column containing zipcodes
+    '''
+    output = df.apply(lambda d: long_lat_to_zipcode(df[long_col],df[long_col]), axis=1)
+    return output
