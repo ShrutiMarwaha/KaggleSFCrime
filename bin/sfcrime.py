@@ -44,29 +44,17 @@ training_set = engineering.find_zipcodes_dataframe(training_set)
 test_set = engineering.find_zipcodes_dataframe(test_set)
 # print len(training_set.zip.unique())
 
-training_features = training_set.drop("Dates", axis=1)
-# TODO: remove other columns also that you do not want
-print training_features.head()
-
-# combine important features.
-# TODO: do not include category in training_features
-training_features = pd.concat( (training_striped_time,training_zipcodes,training_set[["DayOfWeek","PdDistrict"]]), axis=1)
-print "after features extraction - training data: \n %s \n" % training_features.head()
-test_features = pd.concat( (test_striped_time,test_zipcodes,test_set[["DayOfWeek","PdDistrict"]]), axis=1)
-print "after features extraction - training datatest data: \n %s \n" % test_features.head()
-
+print training_set.head(3)
+training_features = training_set.drop(["Category","Dates","Resolution","Descript","Address","X","Y"], axis=1)
+# remove the columns not needed
+print training_features.head(3)
+test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
 # save files for future use
 # training_features.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
 # test_features.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test_features.pkl")
 
 # load training set features
 # training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
-
-######################
-# remove outcomes, keep features only
-# training_features2 = training_features.drop("Category", axis=1)
-# training_features2.dtypes
-######################
 
 # Create Dummy Variables from Categorical Data
 # decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
