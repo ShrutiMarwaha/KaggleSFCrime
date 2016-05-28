@@ -40,17 +40,18 @@ def long_lat_to_zipcode(input_longitude,input_latitude):
 
 # long_lat_to_zipcode(-122.4033, 37.71343)
 
-def find_zipcodes_dataframe(df,long_col,lat_col):
+
+def find_zipcodes_dataframe(data_frame,long_col,lat_col):
     '''
-    function that applies long_lat_to_zipcode function to all rows of dataframe and returns a data frame
-    :param df: data frame
+    function that applies long_lat_to_zipcode function to all rows of data frame and returns a data frame
+    :param data_frame: data frame
     :param long_col: column name that contains longitude
     :param lat_col: column name that contains latitude
     :return: original data frame with additional column containing zipcodes
     '''
-    #output = df.apply(lambda d: long_lat_to_zipcode(df[long_col],df[lat_col]), axis=1)
-    # output = df.apply( lambda d: pd.Series({ 'zip': long_lat_to_zipcode(df[long_col],df[lat_col]) }), axis=1 )
-    output = df.apply(lambda d: long_lat_to_zipcode(df["X"],df["Y"]), axis=1)
-    return output
 
+    # output = data_frame.apply(lambda d: long_lat_to_zipcode(d[long_col],d[lat_col]), axis=1)
+    # return output
 
+    data_frame.loc[:,"zip"] = pd.Series( data_frame.apply(lambda d: long_lat_to_zipcode(d["X"],d["Y"]), axis=1), index=data_frame.index)
+    return data_frame
