@@ -25,9 +25,19 @@ test_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/Machine
 analysis.data_summary(training_set)
 analysis.data_summary(test_set)
 
+# outcomes: classes to be predicted
+outcomes = training_set.Category
+# convert outcome classes from string to numeric
+# le_class = preprocessing.LabelEncoder()
+# outcomes = le_class.fit_transform(training_set.Category)
+# outcomes = pd.Series(outcomes)
+outcomes.shape
+outcomes_frequency = outcomes.value_counts(ascending=True)
+outcomes_frequency.head()
+
 # feature extraction
-training_striped_time = extractor.extract_date_dataframe(training_set.Dates)
-test_striped_time = extractor.extract_date_dataframe(test_set.Dates)
+training_striped_time = extractor.extract_date_time(training_set,"Dates")
+test_striped_time = extractor.extract_date_time(test_set,"Dates")
 
 # feature engineering
 training_zipcodes = training_set.apply(lambda d: engineering.long_lat_to_zipcode(d["X"],d["Y"]), axis=1)
@@ -38,8 +48,9 @@ test_zipcodes = test_set.apply(lambda d: engineering.long_lat_to_zipcode(d["X"],
 test_zipcodes.name = "zip"
 #training_zipcodes.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_zipcodes.pkl")
 
-# combine important features
-training_features = pd.concat( (training_striped_time,training_zipcodes,training_set[["DayOfWeek","PdDistrict","Category"]]), axis=1)
+# combine important features.
+# TODO: do not include category in training_features
+training_features = pd.concat( (training_striped_time,training_zipcodes,training_set[["DayOfWeek","PdDistrict"]]), axis=1)
 print "after features extraction - training data: \n %s \n" % training_features.head()
 test_features = pd.concat( (test_striped_time,test_zipcodes,test_set[["DayOfWeek","PdDistrict"]]), axis=1)
 print "after features extraction - training datatest data: \n %s \n" % test_features.head()
@@ -51,26 +62,20 @@ print "after features extraction - training datatest data: \n %s \n" % test_feat
 # load training set features
 # training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
 
-# Create Dummy Variables from Categorical Data
+######################
 # remove outcomes, keep features only
-training_features2 = training_features.drop("Category", axis=1)
-training_features2.dtypes
+# training_features2 = training_features.drop("Category", axis=1)
+# training_features2.dtypes
+######################
+
+# Create Dummy Variables from Categorical Data
 # decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
-categorical_columns = training_features2.columns.tolist()
+categorical_columns = training_features.columns.tolist()
 
-training_dummy_var = modeling.create_dummy_var(training_features2,categorical_columns)
-print "compare number of features earlier: %s, now: %s" % (training_features2.shape[1], training_dummy_var.shape[1])
-print training_dummy_var.columns.tolist()
-print training_dummy_var.head()
+training_dummy_var = modeling.create_dummy_var(training_features,categorical_columns)
+test_dummy_var = modeling.create_dummy_var(test_features,categorical_columns)
+analysis.data_summary(training_dummy_var)
 
-outcomes = training_features.Category
-# convert outcome classes from string to numeric
-# le_class = preprocessing.LabelEncoder()
-# outcomes = le_class.fit_transform(training_features.Category)
-# outcomes = pd.Series(outcomes)
-outcomes.shape
-outcomes_frequency = outcomes.value_counts(ascending=True)
-outcomes_frequency.head()
 
 # divide data in to training and intermediate set
 features_train, features_intermediate, outcomes_train, outcomes_intermediate = cv.train_test_split(training_dummy_var,outcomes,test_size=0.4,random_state=0)
