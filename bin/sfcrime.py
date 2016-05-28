@@ -30,11 +30,11 @@ training_striped_time = extractor.extract_date_dataframe(training_set.Dates)
 test_striped_time = extractor.extract_date_dataframe(test_set.Dates)
 
 # feature engineering
-training_zipcodes = training_set.apply(lambda d: engineering.closest_zipcode(d["X"],d["Y"]), axis=1)
+training_zipcodes = training_set.apply(lambda d: engineering.long_lat_to_zipcode(d["X"],d["Y"]), axis=1)
 training_zipcodes.name = "zip"
 # print len(training_zipcodes.unique())
 
-test_zipcodes = test_set.apply(lambda d: engineering.closest_zipcode(d["X"],d["Y"]), axis=1)
+test_zipcodes = test_set.apply(lambda d: engineering.long_lat_to_zipcode(d["X"],d["Y"]), axis=1)
 test_zipcodes.name = "zip"
 #training_zipcodes.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_zipcodes.pkl")
 
