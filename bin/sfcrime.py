@@ -6,10 +6,11 @@ from processors import feature_engineering as engineering
 from processors import modeling
 
 # import libraries
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn import svm
+from sklearn.svm import SVC
 from sklearn.naive_bayes import BernoulliNB
 from sklearn import grid_search as gs
 from sklearn import cross_validation as cv
@@ -30,6 +31,9 @@ outcomes = training_set.Category
 # le_class = preprocessing.LabelEncoder()
 # outcomes = le_class.fit_transform(training_set.Category)
 # outcomes = pd.Series(outcomes)
+# save files for future use
+# outcomes.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
+
 outcomes.shape
 outcomes_frequency = outcomes.value_counts(ascending=True)
 outcomes_frequency.head()
@@ -54,6 +58,8 @@ test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
 
 # load training set features
 # training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
+# outcomes = outcomes = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
+
 
 # Create Dummy Variables from Categorical Data
 # decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
@@ -73,6 +79,13 @@ print(features_test.shape)
 print(features_validation.shape)
 
 # build the model
+modeling.basic_model("LogisticRegression",features_train,features_test,outcomes_train,outcomes_test)
+modeling.basic_model("RandomForestClassifier",features_train,features_test,outcomes_train,outcomes_test)
+modeling.basic_model("BernoulliNB",features_train,features_test,outcomes_train,outcomes_test)
+# modeling.basic_model("GradientBoostingClassifier",features_train,features_test,outcomes_train,outcomes_test) # takes very long
+# modeling.basic_model("SVC",features_train,features_test,outcomes_train,outcomes_test) # donot try, takes very very long
+
+#########################################################################
 model = LogisticRegression(n_jobs=-1,random_state=0)
 #model = RandomForestClassifier(n_jobs=-1,random_state=0)
 #model = BernoulliNB()
@@ -85,10 +98,13 @@ expected = outcomes_test
 predicted = model.predict(features_test)
 
 # summarize the fit of the model
+print(metrics.accuracy_score(expected, predicted))
 print(metrics.classification_report(expected, predicted))
 print(metrics.confusion_matrix(expected, predicted))
-print(metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
-print(metrics.accuracy_score(expected, predicted))
+# print(metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
+#############################
+
+
 
 ###################### Grid Search with Cross Validation ######################
 # to run k-fold cross validation, remove classes which have less than "k" samples.
@@ -120,17 +136,20 @@ algo = LogisticRegression(random_state=0,n_jobs=-1)
 # param_grid is dictionary where key is parameter name and value is the numeric values you want to try for that parameter
 # parameter grid for Logistic Regression
 param_grid = {'C': [0.01, 0.1, 1, 10, 100]}
+
 # # parameter grid for Random Forest
 # param_grid = {'n_estimators': [10, 100, 200], 'max_depth': [None,15,30], 'max_features': ['sqrt','log2']}
+
 # # parameter grid for Naive Bayes
 # param_grid = {'alpha': [0.01, 0.1, 1, 10, 100]}
+
 # # parameter grid for Gradient Boosting Classifier
 # param_grid = {'learning_rate': [0.1,1,10], 'max_depth': [3,10,15], 'n_estimators': [100, 500, 1000], 'max_features': ['sqrt','log2']}
 
 # GridSearch with 10 fold CV will take very long, so running only 3 folds to find the best parameters.
 # use RandomizedSearchCV that searches a subset of the parameters to reduce computational expense
 cv_model = gs.GridSearchCV(algo, param_grid, cv=3, scoring='accuracy')
-# TODO: cv_model = gs.GridSearchCV(algo, param_grid, cv=3, scoring='f1_samples',n_jobs=-1)
+# TODO: cv_model = gs.GridSearchCV(algo, param_grid, cv=3, scoring='f1_score',n_jobs=-1)
 # scoring: f1_samples (for multilabel sample); f1 (for for binary targets); accuracy (for model accuracy)
 cv_model.fit(cv_features_train, cv_outcomes_train)
 
