@@ -13,7 +13,7 @@ def create_dummy_var(df,categorical_col):
     dummy_var_df = pd.get_dummies(df)
     return dummy_var_df
 
-def process(model_name):
+def basic_model(model_name):
     pass
 
 def model1():
