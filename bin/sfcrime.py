@@ -36,17 +36,17 @@ outcomes_frequency = outcomes.value_counts(ascending=True)
 outcomes_frequency.head()
 
 # feature extraction
-training_striped_time = extractor.extract_date_time(training_set,"Dates")
-test_striped_time = extractor.extract_date_time(test_set,"Dates")
+training_set = extractor.extract_date_time(training_set)
+test_set = extractor.extract_date_time(test_set)
 
 # feature engineering
-training_zipcodes = training_set.apply(lambda d: engineering.long_lat_to_zipcode(d["X"],d["Y"]), axis=1)
-training_zipcodes.name = "zip"
-# print len(training_zipcodes.unique())
+training_set = engineering.find_zipcodes_dataframe(training_set)
+test_set = engineering.find_zipcodes_dataframe(test_set)
+# print len(training_set.zip.unique())
 
-test_zipcodes = test_set.apply(lambda d: engineering.long_lat_to_zipcode(d["X"],d["Y"]), axis=1)
-test_zipcodes.name = "zip"
-#training_zipcodes.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_zipcodes.pkl")
+training_features = training_set.drop("Dates", axis=1)
+# TODO: remove other columns also that you do not want
+print training_features.head()
 
 # combine important features.
 # TODO: do not include category in training_features
