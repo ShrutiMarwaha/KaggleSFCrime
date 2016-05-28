@@ -1,5 +1,4 @@
 # import libraries
-import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
@@ -64,7 +63,6 @@ training_dummy_var = modeling.create_dummy_var(training_features,categorical_col
 test_dummy_var = modeling.create_dummy_var(test_features,categorical_columns)
 analysis.data_summary(training_dummy_var)
 
-
 # divide data in to training and intermediate set
 features_train, features_intermediate, outcomes_train, outcomes_intermediate = cv.train_test_split(training_dummy_var,outcomes,test_size=0.4,random_state=0)
 # divide intermediate set into test and validation set.
@@ -85,8 +83,6 @@ model.fit(features_train, outcomes_train)
 # make predictions
 expected = outcomes_test
 predicted = model.predict(features_test)
-print "true values: \n%s" % expected[:6]
-print "predicted values: %s" % predicted[:6]
 
 # summarize the fit of the model
 print(metrics.classification_report(expected, predicted))
