@@ -20,6 +20,27 @@ print(sf_zipcodes_df.shape)
 print(sf_zipcodes_df.head())
 
 ############# sfcrime.py
+
+model = LogisticRegression(n_jobs=-1,random_state=0)
+#model = RandomForestClassifier(n_jobs=-1,random_state=0)
+#model = BernoulliNB()
+#model = SVC() # donot try, takes very very long
+#model= GradientBoostingClassifier(random_state=0) # takes very long
+model.fit(features_train, outcomes_train)
+
+# make predictions
+expected = outcomes_test
+predicted = model.predict(features_test)
+
+# summarize the fit of the model
+print(metrics.accuracy_score(expected, predicted))
+print(metrics.classification_report(expected, predicted))
+print(metrics.confusion_matrix(expected, predicted))
+# print(metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
+#############################
+
+
+
 # divide data in to training and validation set. Since performing cross validation, no need for test set
 # validation set will be only used once to evaluate final model's performance
 cv_features_train, cv_features_validation, cv_outcomes_train, cv_outcomes_validation = cv.train_test_split(training_dummy_var2,outcomes2,test_size=0.4,random_state=0)

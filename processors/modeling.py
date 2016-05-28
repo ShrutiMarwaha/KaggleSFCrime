@@ -5,6 +5,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.naive_bayes import BernoulliNB
+from sklearn import grid_search as gs
+from sklearn import cross_validation as cv
+
 
 
 def create_dummy_var(df,categorical_col):
@@ -20,7 +23,18 @@ def create_dummy_var(df,categorical_col):
     dummy_var_df = pd.get_dummies(df)
     return dummy_var_df
 
-def basic_model(mlalgo,train_variables,train_output,test_variables,test_output):
+def basic_model(mlalgo,trainingset_features,trainingset_outcomes,testset_features,testset_outcomes):
+    '''
+    simple function to apply machine learning algorithms with default parameters.
+    random_state is used to set pseudo seed, n_jobs=-1 uses all available cpus
+
+    :param mlalgo: machine learning algorithms
+    :param trainingset_features:
+    :param trainingset_outcomes:
+    :param testset_features:
+    :param testset_outcomes:
+    :return:
+    '''
     if mlalgo=="BernoulliNB":
         model = BernoulliNB()
     elif mlalgo=="SVC":
@@ -33,20 +47,51 @@ def basic_model(mlalgo,train_variables,train_output,test_variables,test_output):
         model = LogisticRegression(n_jobs=-1,random_state=0)
 
     # build the model
-    model.fit(train_variables, train_output)
+    model.fit(trainingset_features, trainingset_outcomes)
 
-    expected = test_output
+    expected = testset_outcomes
     # make predictions
-    predicted = model.predict(test_variables)
+    predicted = model.predict(testset_features)
 
     # summarize the fit of the model
-    print(metrics.classification_report(expected, predicted))
-    print(metrics.confusion_matrix(expected, predicted))
-    # print(metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
+    print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
+    print("classification_report: %s \n" % metrics.classification_report(expected, predicted))
+    print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
+    #print("auc score: %s \n" % metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
     return metrics.accuracy_score(expected, predicted)
 
-# def basic_model(mlalgo,train_variables,train_output,test_variables,test_output):
-#     if mlalgo=="BernoulliNB":
-#         model = BernoulliNB()
-#     elif mlalgo=="SVC":
-#         model = SVC()
+def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
+    '''
+    Grid Search with Cross Validation.
+    param_grid is dictionary where key is parameter name and value is the numeric values you want to try for that parameter
+
+    :param mlalgo: machine learning algorithm to apply
+    :param folds: cross validations folds
+    :param trainingset_features:
+    :param trainingset_outcomes:
+    :return cv_model.best_params_: parameters from param_grid which give best model scores
+    '''
+    if mlalgo=="BernoulliNB":
+        algo = BernoulliNB()
+        param_grid = {'alpha': [0.1, 1, 10]}
+    elif mlalgo=="SVC":
+        algo = SVC()
+        param_grid = {'C': [0.1, 1, 10]}
+    elif mlalgo=="GradientBoostingClassifier":
+        algo = GradientBoostingClassifier(random_state=0)
+        param_grid = {'learning_rate': [0.1,1,10], 'max_depth': [3,10,15], 'n_estimators': [100, 500, 1000], 'max_features': ['sqrt','log2']}
+    elif mlalgo=="RandomForestClassifier":
+        algo=RandomForestClassifier(n_jobs=-1,random_state=0)
+        param_grid = {'n_estimators': [10, 100, 200], 'max_depth': [None,15,30], 'max_features': ['sqrt','log2']}
+    else:
+        algo = LogisticRegression(n_jobs=-1,random_state=0)
+        #param_grid = {'C': [0.001, 0.1, 1, 10, 100]}
+        param_grid = {'C': [0.01, 1]}
+
+    cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='accuracy')
+    # TODO: cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='f1_score',n_jobs=-1)
+    cv_model.fit(trainingset_features, trainingset_outcomes)
+    print cv_model.grid_scores_
+    # examine the best model
+    print cv_model.best_params_
+    return cv_model.best_params_

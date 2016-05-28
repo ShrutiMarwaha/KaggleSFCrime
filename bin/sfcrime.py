@@ -52,6 +52,7 @@ training_features = training_set.drop(["Category","Dates","Resolution","Descript
 # remove the columns not needed
 print training_features.head(3)
 test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
+
 # save files for future use
 # training_features.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
 # test_features.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test_features.pkl")
@@ -85,26 +86,6 @@ modeling.basic_model("BernoulliNB",features_train,features_test,outcomes_train,o
 # modeling.basic_model("GradientBoostingClassifier",features_train,features_test,outcomes_train,outcomes_test) # takes very long
 # modeling.basic_model("SVC",features_train,features_test,outcomes_train,outcomes_test) # donot try, takes very very long
 
-#########################################################################
-model = LogisticRegression(n_jobs=-1,random_state=0)
-#model = RandomForestClassifier(n_jobs=-1,random_state=0)
-#model = BernoulliNB()
-#model = SVC() # donot try, takes very very long
-#model= GradientBoostingClassifier(random_state=0) # takes very long
-model.fit(features_train, outcomes_train)
-
-# make predictions
-expected = outcomes_test
-predicted = model.predict(features_test)
-
-# summarize the fit of the model
-print(metrics.accuracy_score(expected, predicted))
-print(metrics.classification_report(expected, predicted))
-print(metrics.confusion_matrix(expected, predicted))
-# print(metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
-#############################
-
-
 
 ###################### Grid Search with Cross Validation ######################
 # to run k-fold cross validation, remove classes which have less than "k" samples.
@@ -113,9 +94,6 @@ outcomes_frequency.head()
 outcomes_frequency[outcomes_frequency < 10 ]
 matchings_indices = [ i for i, value in enumerate(outcomes) if value == "TREA" ]
 # matchings_indices = [ i for i, value in enumerate(outcomes) if value == 33 ] #if outcomes very converted to numeric
-# for i, value in enumerate(outcomes):
-#             if value == "TREA":
-#                 print i
 outcomes[matchings_indices]
 # remove these samples from features and outcomes data
 outcomes2 = outcomes.drop(matchings_indices)
