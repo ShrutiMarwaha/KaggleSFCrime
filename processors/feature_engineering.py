@@ -1,5 +1,6 @@
 from pyzipcode import ZipCodeDatabase
 from scipy.spatial import distance
+import pandas as pd
 
 zcdb = ZipCodeDatabase()
 sf_zipcodes = zcdb.find_zip(city="San Francisco", state="CA")
@@ -47,5 +48,9 @@ def find_zipcodes_dataframe(df,long_col,lat_col):
     :param lat_col: column name that contains latitude
     :return: original data frame with additional column containing zipcodes
     '''
-    output = df.apply(lambda d: long_lat_to_zipcode(df[long_col],df[long_col]), axis=1)
+    #output = df.apply(lambda d: long_lat_to_zipcode(df[long_col],df[lat_col]), axis=1)
+    # output = df.apply( lambda d: pd.Series({ 'zip': long_lat_to_zipcode(df[long_col],df[lat_col]) }), axis=1 )
+    output = df.apply(lambda d: long_lat_to_zipcode(df["X"],df["Y"]), axis=1)
     return output
+
+
