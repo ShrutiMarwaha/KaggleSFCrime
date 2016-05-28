@@ -1,7 +1,7 @@
 from datetime import datetime
 import pandas as pd
 
-def extract_date_time(df,colname):
+def extract_date_time(df,colname="Dates"):
     '''
     function to extract year, month and hour from one column in data frame
     :param df, colname: data frame, column name which contains datetime
