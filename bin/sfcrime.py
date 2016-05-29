@@ -6,16 +6,15 @@ from processors import feature_engineering as engineering
 from processors import modeling
 
 # import libraries
+from sklearn import cross_validation as cv
+from sklearn import metrics
 import pandas as pd
+from sklearn import preprocessing
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.naive_bayes import BernoulliNB
-from sklearn import grid_search as gs
-from sklearn import cross_validation as cv
-from sklearn import metrics
-from sklearn import preprocessing
 
 # load data
 training_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/train.csv")
@@ -33,10 +32,8 @@ outcomes = training_set.Category
 # outcomes = pd.Series(outcomes)
 # save files for future use
 # outcomes.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
-
-outcomes.shape
 outcomes_frequency = outcomes.value_counts(ascending=True)
-outcomes_frequency.head()
+print "number of samples in each class: %s \n" % outcomes_frequency.head()
 
 # feature extraction
 training_set = extractor.extract_date_time(training_set)
@@ -45,12 +42,11 @@ test_set = extractor.extract_date_time(test_set)
 # feature engineering
 training_set = engineering.find_zipcodes_dataframe(training_set)
 test_set = engineering.find_zipcodes_dataframe(test_set)
-# print len(training_set.zip.unique())
 
-print training_set.head(3)
+print "training set:\n%s" % training_set.head(3)
 training_features = training_set.drop(["Category","Dates","Resolution","Descript","Address","X","Y"], axis=1)
-# remove the columns not needed
-print training_features.head(3)
+# remove the columns that should not be used for model building
+print "training set:\n%s" % training_features.head(3)
 test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
 
 # save files for future use
@@ -61,11 +57,9 @@ test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
 # training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
 # outcomes = outcomes = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
 
-
-# Create Dummy Variables from Categorical Data
 # decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
 categorical_columns = training_features.columns.tolist()
-
+# Create Dummy Variables from Categorical Data
 training_dummy_var = modeling.create_dummy_var(training_features,categorical_columns)
 test_dummy_var = modeling.create_dummy_var(test_features,categorical_columns)
 analysis.data_summary(training_dummy_var)
@@ -75,16 +69,16 @@ features_train, features_intermediate, outcomes_train, outcomes_intermediate = c
 # divide intermediate set into test and validation set.
 # validation set will be only used once to evaluate final model's performance
 features_test, features_validation, outcomes_test, outcomes_validation = cv.train_test_split(features_intermediate,outcomes_intermediate,test_size=0.5,random_state=0)
-print(features_train.shape)
-print(features_test.shape)
-print(features_validation.shape)
+print "dimension of training set %s" % (features_train.shape,)
+print "dimension of test set %s" % (features_test.shape,)
+print "dimension of validation set %s" % (features_validation.shape,)
 
 # build the model
-modeling.basic_model("LogisticRegression",features_train,features_test,outcomes_train,outcomes_test)
-modeling.basic_model("RandomForestClassifier",features_train,features_test,outcomes_train,outcomes_test)
-modeling.basic_model("BernoulliNB",features_train,features_test,outcomes_train,outcomes_test)
-# modeling.basic_model("GradientBoostingClassifier",features_train,features_test,outcomes_train,outcomes_test) # takes very long
-# modeling.basic_model("SVC",features_train,features_test,outcomes_train,outcomes_test) # donot try, takes very very long
+modeling.basic_model("LogisticRegression",features_train,outcomes_train,features_test,outcomes_test)
+modeling.basic_model("RandomForestClassifier",features_train,outcomes_train,features_test,outcomes_test)
+modeling.basic_model("BernoulliNB",features_train,outcomes_train,features_test,outcomes_test)
+# modeling.basic_model("GradientBoostingClassifier",features_train,outcomes_train,features_test,outcomes_test) # takes very long
+# modeling.basic_model("SVC",features_train,outcomes_train,features_test,outcomes_test) # donot try, takes very very long
 
 
 ###################### Grid Search with Cross Validation ######################
@@ -105,38 +99,14 @@ cv_features_train, cv_features_validation, cv_outcomes_train, cv_outcomes_valida
 print(cv_features_train.shape)
 print(cv_features_validation.shape)
 
-# select the machine learning algorithm you want to apply
-algo = LogisticRegression(random_state=0,n_jobs=-1)
-# algo = RandomForestClassifier(random_state=0,n_jobs=-1)
-# algo = BernoulliNB()
-# algo = GradientBoostingClassifier()
-
-# param_grid is dictionary where key is parameter name and value is the numeric values you want to try for that parameter
-# parameter grid for Logistic Regression
-param_grid = {'C': [0.01, 0.1, 1, 10, 100]}
-
-# # parameter grid for Random Forest
-# param_grid = {'n_estimators': [10, 100, 200], 'max_depth': [None,15,30], 'max_features': ['sqrt','log2']}
-
-# # parameter grid for Naive Bayes
-# param_grid = {'alpha': [0.01, 0.1, 1, 10, 100]}
-
-# # parameter grid for Gradient Boosting Classifier
-# param_grid = {'learning_rate': [0.1,1,10], 'max_depth': [3,10,15], 'n_estimators': [100, 500, 1000], 'max_features': ['sqrt','log2']}
-
 # GridSearch with 10 fold CV will take very long, so running only 3 folds to find the best parameters.
 # use RandomizedSearchCV that searches a subset of the parameters to reduce computational expense
-cv_model = gs.GridSearchCV(algo, param_grid, cv=3, scoring='accuracy')
-# TODO: cv_model = gs.GridSearchCV(algo, param_grid, cv=3, scoring='f1_score',n_jobs=-1)
-# scoring: f1_samples (for multilabel sample); f1 (for for binary targets); accuracy (for model accuracy)
-cv_model.fit(cv_features_train, cv_outcomes_train)
-
-# model scores for each parameter used in grid
-print cv_model.grid_scores_
-# examine the best model
-print cv_model.best_score_
-print cv_model.best_params_
-# print cv_model.best_estimator_
+# Look at modeling.py for parameters to vary in grid search
+modeling.gridsearch_cv_model("LogisticRegression",2,cv_features_train,cv_outcomes_train)
+modeling.gridsearch_cv_model("RandomForestClassifier",2,cv_features_train,cv_outcomes_train)
+modeling.gridsearch_cv_model("BernoulliNB",2,cv_features_train,cv_outcomes_train)
+# modeling.gridsearch_cv_model("GradientBoostingClassifier",2,cv_features_train,cv_outcomes_train)
+# modeling.gridsearch_cv_model("SVC",2,cv_features_train,cv_outcomes_train)
 
 # now chose algorithm with the best parameters.
 # this step can be avoided if all desired arguments are used in GridSearchCV. GridSearchCV automatically refits the best model.
@@ -144,6 +114,7 @@ model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-
 # model = RandomForestClassifier(n_estimators=200,max_depth=15,n_jobs=-1,random_state=0)
 # model = BernoulliNB(alpha=300)
 # TODO: model = GradientBoostingClassifier(random_state=0)
+# TODO: model = SVC(random_state=0)
 model.fit(cv_features_train, cv_outcomes_train)
 
 # make predictions on validation set. use only once to evaluate final model's performance
@@ -151,8 +122,9 @@ expected = cv_outcomes_validation
 predicted = model.predict(cv_features_validation)
 
 # summarize the fit of the model
-print(metrics.classification_report(expected, predicted))
-print(metrics.confusion_matrix(expected, predicted))
+print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
+print("classification_report: %s \n" % metrics.classification_report(expected, predicted))
+print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
 
 
 
