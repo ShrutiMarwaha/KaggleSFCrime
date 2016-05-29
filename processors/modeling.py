@@ -79,7 +79,8 @@ def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
         param_grid = {'C': [0.1, 1, 10]}
     elif mlalgo=="GradientBoostingClassifier":
         algo = GradientBoostingClassifier(random_state=0)
-        param_grid = {'learning_rate': [0.1,1,10], 'max_depth': [3,10,15], 'n_estimators': [100, 500, 1000], 'max_features': ['sqrt','log2']}
+        #param_grid = {'learning_rate': [0.1,1,10], 'max_depth': [3,10,15], 'n_estimators': [100, 500, 1000], 'max_features': ['sqrt','log2']}
+        param_grid = {'learning_rate': [0.1,1,10]}
     elif mlalgo=="RandomForestClassifier":
         algo=RandomForestClassifier(n_jobs=-1,random_state=0)
         param_grid = {'n_estimators': [10, 100, 200], 'max_depth': [None,15,30], 'max_features': ['sqrt','log2']}
@@ -91,7 +92,9 @@ def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
     cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='accuracy')
     # TODO: cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='f1_score',n_jobs=-1)
     cv_model.fit(trainingset_features, trainingset_outcomes)
-    print cv_model.grid_scores_
+    print "scores for each model %s" % cv_model.grid_scores_
     # examine the best model
-    print cv_model.best_params_
+    print "best parameter value %s" % cv_model.best_params_
+    print "score for best model %s" % cv_model.best_score_
+
     return cv_model.best_params_
