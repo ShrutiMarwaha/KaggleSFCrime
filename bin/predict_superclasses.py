@@ -3,6 +3,12 @@ import pandas as pd
 from sklearn import cross_validation as cv
 from processors import modeling
 from processors import aggregate_classes as ac
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import BernoulliNB
+from sklearn import metrics
 
 # load training set features
 training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
@@ -15,18 +21,16 @@ for outcome in outcomes:
     crime_class.append( ac.get_key(ac.crime_dict,outcome) )
 
 crime_class = pd.Series(crime_class)
-print crime_class.shape
-print crime_class.value_counts(ascending=True)
 
 # Create Dummy Variables from Categorical Data
 # decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
 categorical_columns = training_features.columns.tolist()
 training_dummy_var = modeling.create_dummy_var(training_features,categorical_columns)
 
-# # divide data in to training and intermediate set
+# divide data in to training and intermediate set
 features_train, features_intermediate, outcomes_train, outcomes_intermediate = cv.train_test_split(training_dummy_var,crime_class,test_size=0.4,random_state=0)
-# # divide intermediate set into test and validation set.
-# # validation set will be only used once to evaluate final model's performance
+# divide intermediate set into test and validation set.
+# validation set will be only used once to evaluate final model's performance
 features_test, features_validation, outcomes_test, outcomes_validation = cv.train_test_split(features_intermediate,outcomes_intermediate,test_size=0.5,random_state=0)
 
 print "build model through function \n"
@@ -35,3 +39,21 @@ modeling.basic_model("LogisticRegression",features_train,outcomes_train,features
 # modeling.basic_model("BernoulliNB",features_train,outcomes_train,features_test,outcomes_test)
 # modeling.basic_model("GradientBoostingClassifier",features_train,outcomes_train,features_test,outcomes_test) # takes very long
 # modeling.basic_model("SVC",features_train,outcomes_train,features_test,outcomes_test) # donot try, takes very very long
+
+# now chose algorithm with the best parameters.
+# this step can be avoided if all desired arguments are used in GridSearchCV. GridSearchCV automatically refits the best model.
+model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-1,random_state=0)
+# model = RandomForestClassifier(n_estimators=200,max_depth=15,n_jobs=-1,random_state=0)
+# model = BernoulliNB(alpha=300)
+# TODO: model = GradientBoostingClassifier(random_state=0)
+# TODO: model = SVC(random_state=0)
+model.fit(features_train, outcomes_train)
+
+# make predictions on validation set. use only once to evaluate final model's performance
+expected = outcomes_validation
+predicted = model.predict(features_validation)
+
+# summarize the fit of the model
+print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
+print("classification_report: %s \n" % metrics.classification_report(expected, predicted))
+print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
