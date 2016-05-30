@@ -55,8 +55,8 @@ def basic_model(mlalgo,trainingset_features,trainingset_outcomes,testset_feature
 
     # summarize the fit of the model
     print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
-    print("classification_report: %s \n" % metrics.classification_report(expected, predicted))
-    print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
+    print("classification_report: \n%s" % metrics.classification_report(expected, predicted))
+    print("confusion matrix: \n%s" % metrics.confusion_matrix(expected, predicted))
     #print("auc score: %s \n" % metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
     return metrics.accuracy_score(expected, predicted)
 
