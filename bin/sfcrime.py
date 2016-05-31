@@ -56,6 +56,7 @@ test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
 # load training set features
 # training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
 # outcomes = outcomes = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
+# test_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test_features.pkl")
 
 # decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
 train_categorical_columns = list(training_features)
@@ -113,7 +114,6 @@ modeling.gridsearch_cv_model("LogisticRegression",2,cv_features_train,cv_outcome
 modeling.gridsearch_cv_model("RandomForestClassifier",2,cv_features_train,cv_outcomes_train)
 modeling.gridsearch_cv_model("BernoulliNB",2,cv_features_train,cv_outcomes_train)
 # modeling.gridsearch_cv_model("GradientBoostingClassifier",2,cv_features_train,cv_outcomes_train)
-# modeling.gridsearch_cv_model("SVC",2,cv_features_train,cv_outcomes_train)
 
 # now chose algorithm with the best parameters.
 # this step can be avoided if all desired arguments are used in GridSearchCV. GridSearchCV automatically refits the best model.
@@ -121,7 +121,6 @@ model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-
 # model = RandomForestClassifier(n_jobs=-1,random_state=0)
 # model = BernoulliNB(alpha=300)
 # TODO: model = GradientBoostingClassifier(random_state=0)
-# TODO: model = SVC(random_state=0)
 model.fit(cv_features_train, cv_outcomes_train)
 
 # make predictions on validation set. use only once to evaluate final model's performance

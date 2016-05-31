@@ -1,3 +1,5 @@
+# this is same script as sfcrime.py, all the required functions are defined in a single file.
+
 # import libraries
 import pandas as pd
 import numpy as np
@@ -174,7 +176,6 @@ def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
         param_grid = {'C': [0.01, 1]}
 
     cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='accuracy')
-    # TODO: cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='f1_score',n_jobs=-1)
     cv_model.fit(trainingset_features, trainingset_outcomes)
     print "scores for each model %s" % cv_model.grid_scores_
     # examine the best model

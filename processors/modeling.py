@@ -6,9 +6,6 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.naive_bayes import BernoulliNB
 from sklearn import grid_search as gs
-from sklearn import cross_validation as cv
-
-
 
 def create_dummy_var(df,categorical_col):
     """
@@ -93,7 +90,6 @@ def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
         param_grid = {'C': [0.01, 1]}
 
     cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='accuracy')
-    # TODO: cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='f1_score',n_jobs=-1)
     cv_model.fit(trainingset_features, trainingset_outcomes)
     print "scores for each model %s" % cv_model.grid_scores_
     # examine the best model
