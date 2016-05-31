@@ -18,9 +18,12 @@ outcomes = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearni
 crime_class = []
 
 for outcome in outcomes:
-    crime_class.append( ac.get_key(ac.crime_dict,outcome) )
+    #crime_class.append( ac.get_key(ac.crime_dict,outcome) ) # group the existing categories of crime into 3: Infraction, Misdemeanor, Felony
+    crime_class.append( ac.get_key(ac.crime_voilence_dict,outcome) ) # group the existing categories of crime into 2: Voilent and non-voilent crimes
+
 
 crime_class = pd.Series(crime_class)
+print crime_class.head()
 
 # Create Dummy Variables from Categorical Data
 # decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
@@ -37,7 +40,7 @@ print "build model through function \n"
 modeling.basic_model("LogisticRegression",features_train,outcomes_train,features_test,outcomes_test)
 # modeling.basic_model("RandomForestClassifier",features_train,outcomes_train,features_test,outcomes_test)
 # modeling.basic_model("BernoulliNB",features_train,outcomes_train,features_test,outcomes_test)
-# modeling.basic_model("GradientBoostingClassifier",features_train,outcomes_train,features_test,outcomes_test) # takes very long
+# modeling.basic_model("GradientBoostingClassifier",features_train,outcomes_train,features_test,outcomes_test)
 # modeling.basic_model("SVC",features_train,outcomes_train,features_test,outcomes_test) # donot try, takes very very long
 
 # now chose algorithm with the best parameters.

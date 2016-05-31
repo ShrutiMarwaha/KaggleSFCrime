@@ -4,6 +4,14 @@ crime_dict ={"infraction":["LOITERING"], "misdemeanor":["BAD CHECKS", "BRIBERY",
                                                         "PROSTITUTION", "RECOVERED VEHICLE", "RUNAWAY", "SECONDARY CODES", "STOLEN PROPERTY", "SUICIDE", "SUSPICIOUS OCC", "TREA", "TRESPASS", "WARRANTS"],
              "felony": ["ARSON", "ASSAULT", "BURGLARY", "EXTORTION", "FRAUD", "KIDNAPPING", "LARCENY/THEFT", "ROBBERY", "SEX OFFENSES FORCIBLE", "SEX OFFENSES NON FORCIBLE", "VANDALISM", "VEHICLE THEFT", "WEAPON LAWS"]}
 
+# club different crimes as voilent and non-voilent
+crime_voilence_dict = {"non-voilent":["BAD CHECKS", "BRIBERY", "DISORDERLY CONDUCT","DRIVING UNDER THE INFLUENCE", "DRUNKENNESS", "EMBEZZLEMENT", "FAMILY OFFENSES","FORGERY/COUNTERFEITING", "FRAUD",
+                                  "GAMBLING", "LIQUOR LAWS", "MISSING PERSON", "NON-CRIMINAL", "OTHER OFFENSES", "PORNOGRAPHY/OBSCENE MAT", "PROSTITUTION", "LOITERING", "RUNAWAY", "SECONDARY CODES",
+                                  "TREA", "TRESPASS", "WARRANTS"],
+                       "voilent": ["ARSON", "ASSAULT", "BURGLARY", "DRUG/NARCOTIC", "EXTORTION", "KIDNAPPING", "LARCENY/THEFT", "ROBBERY", "RECOVERED VEHICLE", "SEX OFFENSES FORCIBLE",
+                                       "SEX OFFENSES NON FORCIBLE", "STOLEN PROPERTY", "SUICIDE", "SUSPICIOUS OCC", "VANDALISM", "VEHICLE THEFT", "WEAPON LAWS"]}
+
+
 def get_key(dict_name,value_name):
     '''
     from a dictionary, given a value, get the key
@@ -15,6 +23,11 @@ def get_key(dict_name,value_name):
     for k, v in dict_name.iteritems():
         if value_name in v:
              return k
+
+# print get_key(crime_dict,"ASSAULT")
+# print get_key(crime_voilence_dict,"ASSAULT")
+
+###########################################################
 
 from processors import loader
 import pandas as pd
