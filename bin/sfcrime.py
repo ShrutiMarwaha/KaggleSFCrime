@@ -17,8 +17,8 @@ from sklearn.svm import SVC
 from sklearn.naive_bayes import BernoulliNB
 
 # load data
-training_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/train.csv")
-test_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test.csv")
+training_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/train.csv")
+test_set = loader.load_csv_data("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/test.csv")
 
 # data exploration
 analysis.data_summary(training_set)
@@ -33,7 +33,7 @@ outcomes = training_set.Category
 # save files for future use
 # outcomes.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
 outcomes_frequency = outcomes.value_counts(ascending=True)
-print "number of samples in each class: %s \n" % outcomes_frequency.head()
+print "number of samples in each class: \n%s" % outcomes_frequency.head()
 
 # feature extraction
 training_set = extractor.extract_date_time(training_set)
@@ -58,11 +58,18 @@ test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
 # outcomes = outcomes = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
 
 # decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
-categorical_columns = training_features.columns.tolist()
+train_categorical_columns = list(training_features)
+print train_categorical_columns
 # Create Dummy Variables from Categorical Data
-training_dummy_var = modeling.create_dummy_var(training_features,categorical_columns)
-test_dummy_var = modeling.create_dummy_var(test_features,categorical_columns)
+training_dummy_var = modeling.create_dummy_var(training_features,train_categorical_columns)
 analysis.data_summary(training_dummy_var)
+
+test_categorical_columns = list(test_features)
+print test_categorical_columns
+#do not include first column - ID
+test_categorical_columns.remove("Id")
+test_dummy_var = modeling.create_dummy_var(test_features.drop(["Id"], axis=1),test_categorical_columns)
+analysis.data_summary(test_dummy_var)
 
 # divide data in to training and intermediate set
 features_train, features_intermediate, outcomes_train, outcomes_intermediate = cv.train_test_split(training_dummy_var,outcomes,test_size=0.4,random_state=0)
@@ -111,7 +118,7 @@ modeling.gridsearch_cv_model("BernoulliNB",2,cv_features_train,cv_outcomes_train
 # now chose algorithm with the best parameters.
 # this step can be avoided if all desired arguments are used in GridSearchCV. GridSearchCV automatically refits the best model.
 model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-1,random_state=0)
-# model = RandomForestClassifier(n_estimators=200,max_depth=15,n_jobs=-1,random_state=0)
+# model = RandomForestClassifier(n_jobs=-1,random_state=0)
 # model = BernoulliNB(alpha=300)
 # TODO: model = GradientBoostingClassifier(random_state=0)
 # TODO: model = SVC(random_state=0)
@@ -120,11 +127,29 @@ model.fit(cv_features_train, cv_outcomes_train)
 # make predictions on validation set. use only once to evaluate final model's performance
 expected = cv_outcomes_validation
 predicted = model.predict(cv_features_validation)
+predicted_prob = model.predict_proba(cv_features_validation)
+loss = metrics.log_loss(expected, predicted_prob)
+model.classes_
+result = pd.DataFrame(predicted_prob, columns=model.classes_)
 
 # summarize the fit of the model
 print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
 print("classification_report: %s \n" % metrics.classification_report(expected, predicted))
 print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
+print("log loss: %s \n" % loss)
 
+######### final code for submission to kaggle #######
+#model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-1,random_state=0)
+model = RandomForestClassifier(n_jobs=-1,random_state=0)
+model.fit(training_dummy_var, outcomes)
 
+# make predictions
+predicted_prob = model.predict_proba(test_dummy_var)
+result = pd.DataFrame(predicted_prob, columns=model.classes_)
+finalresult = pd.concat([ test_set.Id,result ], axis=1)
 
+pd.set_option('display.max_columns', None)
+print finalresult.head()
+print finalresult.shape
+
+finalresult.to_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/finalresult.csv")

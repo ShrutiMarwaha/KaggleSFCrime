@@ -52,11 +52,14 @@ def basic_model(mlalgo,trainingset_features,trainingset_outcomes,testset_feature
     expected = testset_outcomes
     # make predictions
     predicted = model.predict(testset_features)
+    predicted_prob = model.predict_proba(testset_features)
+    loss = metrics.log_loss(expected, predicted_prob)
 
     # summarize the fit of the model
     print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
     print("classification_report: \n%s" % metrics.classification_report(expected, predicted))
     print("confusion matrix: \n%s" % metrics.confusion_matrix(expected, predicted))
+    print("log loss: %s \n" % loss)
     #print("auc score: %s \n" % metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
     return metrics.accuracy_score(expected, predicted)
 
