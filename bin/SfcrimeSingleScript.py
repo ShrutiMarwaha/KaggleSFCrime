@@ -14,6 +14,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.naive_bayes import BernoulliNB
+from sklearn import preprocessing
 
 ############################################ define all functions ############################################
 def data_summary(df):
@@ -196,6 +197,10 @@ data_summary(test_set)
 
 # outcomes: classes to be predicted
 outcomes = training_set.Category
+# convert outcome classes from string to numeric
+# le_class = preprocessing.LabelEncoder()
+# outcomes = le_class.fit_transform(training_set.Category)
+# outcomes = pd.Series(outcomes)
 
 # feature extraction
 training_set = extract_date_time(training_set)

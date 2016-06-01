@@ -86,8 +86,8 @@ def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
         param_grid = {'n_estimators': [10, 100, 200], 'max_depth': [None,15,30], 'max_features': ['sqrt','log2']}
     else:
         algo = LogisticRegression(n_jobs=-1,random_state=0)
-        #param_grid = {'C': [0.001, 0.1, 1, 10, 100]}
-        param_grid = {'C': [0.01, 1]}
+        #param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
+        param_grid = {'C': [ 1]}
 
     cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='accuracy')
     cv_model.fit(trainingset_features, trainingset_outcomes)
