@@ -5,10 +5,9 @@ from processors import feature_extractor as extractor
 from processors import feature_engineering as engineering
 from processors import modeling
 # import libraries
+import pandas as pd
 from sklearn import cross_validation as cv
 from sklearn import metrics
-import pandas as pd
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
@@ -25,7 +24,7 @@ analysis.data_summary(test_set)
 
 # outcomes: classes to be predicted
 outcomes = training_set.Category
-# save files for future use
+# save file for future use
 # outcomes.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
 outcomes_frequency = outcomes.value_counts(ascending=True)
 print "number of samples in each class: \n%s" % outcomes_frequency.head()
@@ -48,15 +47,15 @@ test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
 # training_features.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
 # test_features.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test_features.pkl")
 
-# load training set features
+# directly load following files and skip all above commands than import libraries
 # training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
 # outcomes = outcomes = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
 # test_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test_features.pkl")
 
-# decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
+# Create Dummy Variables from Categorical Data
 train_categorical_columns = list(training_features)
 print train_categorical_columns
-# Create Dummy Variables from Categorical Data
+# decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
 training_dummy_var = modeling.create_dummy_var(training_features,train_categorical_columns)
 analysis.data_summary(training_dummy_var)
 
@@ -106,6 +105,7 @@ print "average accuracy score for cross validation %s: \n" % cvmodel_accuracy.me
 cvmodel_f1 = cv.cross_val_score(estimator=algo, X=cv_features_train, y=cv_outcomes_train, cv=10, scoring='f1_weighted')
 print "average f1 score for cross validation %s: \n" % cvmodel_f1.mean()
 cvmodel_logloss = cv.cross_val_score(estimator=algo, X=cv_features_train, y=cv_outcomes_train, cv=10, scoring='log_loss')
+print "average log-loss score for cross validation %s: \n" % cvmodel_logloss.mean()
 
 # now chose algorithm with the best parameters.
 model = RandomForestClassifier(n_jobs=-1,random_state=0)
