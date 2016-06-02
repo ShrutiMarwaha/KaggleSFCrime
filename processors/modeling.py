@@ -6,6 +6,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.naive_bayes import BernoulliNB
 from sklearn import grid_search as gs
+from sklearn.naive_bayes import GaussianNB
 
 def create_dummy_var(df,categorical_col):
     """
@@ -34,6 +35,8 @@ def basic_model(mlalgo,trainingset_features,trainingset_outcomes,testset_feature
     '''
     if mlalgo=="BernoulliNB":
         model = BernoulliNB()
+    elif mlalgo == "GaussianNB":
+        model= GaussianNB()
     elif mlalgo=="SVC":
         model = SVC()
     elif mlalgo=="GradientBoostingClassifier":
@@ -57,7 +60,6 @@ def basic_model(mlalgo,trainingset_features,trainingset_outcomes,testset_feature
     print("classification_report: \n%s" % metrics.classification_report(expected, predicted))
     print("confusion matrix: \n%s" % metrics.confusion_matrix(expected, predicted))
     print("log loss: %s \n" % loss)
-    #print("auc score: %s \n" % metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
     return metrics.accuracy_score(expected, predicted)
 
 def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
@@ -85,11 +87,14 @@ def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
         algo=RandomForestClassifier(n_jobs=-1,random_state=0)
         param_grid = {'n_estimators': [10, 100, 200], 'max_depth': [None,15,30], 'max_features': ['sqrt','log2']}
     else:
-        algo = LogisticRegression(n_jobs=-1,random_state=0)
-        #param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
-        param_grid = {'C': [ 1]}
+        algo = LogisticRegression(solver='lbfgs',n_jobs=-1,random_state=0)
+        #param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000] }
+        param_grid = {'C': [1,100], 'multi_class': ['ovr', 'multinomial'] }
+        #param_grid = {'C': [1,100]}
 
-    cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='accuracy')
+    #cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='accuracy')
+    cv_model = gs.GridSearchCV(algo, param_grid, cv=folds, scoring='f1_weighted')
+
     cv_model.fit(trainingset_features, trainingset_outcomes)
     print "scores for each model %s" % cv_model.grid_scores_
     # examine the best model

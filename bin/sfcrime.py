@@ -127,7 +127,7 @@ print("classification_report: %s \n" % metrics.classification_report(expected, p
 #print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
 
 ############################### final model for submission to kaggle #############################
-final_model = RandomForestClassifier(n_jobs=-1,random_state=0)
+final_model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-1,random_state=0)
 final_model.fit(training_dummy_var, outcomes)
 
 # make predictions
@@ -139,4 +139,4 @@ pd.set_option('display.max_columns', None)
 print final_result.head()
 print final_result.shape
 
-final_result.to_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/final_result.csv")
+final_result.to_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/final_result.csv",index=False)

@@ -18,8 +18,8 @@ outcomes = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearni
 crime_class = []
 
 for outcome in outcomes:
-    #crime_class.append( ac.get_key(ac.crime_dict,outcome) ) # group the existing categories of crime into 3: Infraction, Misdemeanor, Felony
-    crime_class.append( ac.get_key(ac.crime_voilence_dict,outcome) ) # group the existing categories of crime into 2: Voilent and non-voilent crimes
+    crime_class.append( ac.get_key(ac.crime_dict,outcome) ) # group the existing categories of crime into 3: Infraction, Misdemeanor, Felony
+    #crime_class.append( ac.get_key(ac.crime_voilence_dict,outcome) ) # group the existing categories of crime into 2: Voilent and non-voilent crimes
 
 
 crime_class = pd.Series(crime_class)
@@ -36,27 +36,31 @@ features_train, features_intermediate, outcomes_train, outcomes_intermediate = c
 # validation set will be only used once to evaluate final model's performance
 features_test, features_validation, outcomes_test, outcomes_validation = cv.train_test_split(features_intermediate,outcomes_intermediate,test_size=0.5,random_state=0)
 
-print "build model through function \n"
-modeling.basic_model("LogisticRegression",features_train,outcomes_train,features_test,outcomes_test)
-# modeling.basic_model("RandomForestClassifier",features_train,outcomes_train,features_test,outcomes_test)
-# modeling.basic_model("BernoulliNB",features_train,outcomes_train,features_test,outcomes_test)
+print "build model \n"
+#modeling.basic_model("LogisticRegression",features_train,outcomes_train,features_test,outcomes_test)
+#modeling.basic_model("RandomForestClassifier",features_train,outcomes_train,features_test,outcomes_test)
+modeling.basic_model("BernoulliNB",features_train,outcomes_train,features_test,outcomes_test)
+# modeling.basic_model("GaussianNB",features_train,outcomes_train,features_test,outcomes_test)
 # modeling.basic_model("GradientBoostingClassifier",features_train,outcomes_train,features_test,outcomes_test)
 # modeling.basic_model("SVC",features_train,outcomes_train,features_test,outcomes_test) # donot try, takes very very long
 
 # now chose algorithm with the best parameters.
 # this step can be avoided if all desired arguments are used in GridSearchCV. GridSearchCV automatically refits the best model.
-model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-1,random_state=0)
-# model = RandomForestClassifier(n_estimators=200,max_depth=15,n_jobs=-1,random_state=0)
-# model = BernoulliNB(alpha=300)
-# TODO: model = GradientBoostingClassifier(random_state=0)
-# TODO: model = SVC(random_state=0)
-model.fit(features_train, outcomes_train)
+#model = LogisticRegression(solver='sag',C=1,n_jobs=-1,random_state=0)
+# model = RandomForestClassifier(n_jobs=-1,random_state=0)
+# # # model = BernoulliNB(alpha=300)
+# # # TODO: model = GradientBoostingClassifier(random_state=0)
+# # # TODO: model = SVC(random_state=0)
+# model.fit(features_train, outcomes_train)
+#
+# # make predictions on validation set. use only once to evaluate final model's performance
+# expected = outcomes_validation
+# predicted = model.predict(features_validation)
+# predicted_prob = model.predict_proba(features_validation)
 
-# make predictions on validation set. use only once to evaluate final model's performance
-expected = outcomes_validation
-predicted = model.predict(features_validation)
-
-# summarize the fit of the model
-print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
-print("classification_report: %s \n" % metrics.classification_report(expected, predicted))
-print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
+# # summarize the fit of the model
+# print("log loss: %s \n" % metrics.log_loss(expected, predicted_prob))
+# print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
+# print("classification_report: %s \n" % metrics.classification_report(expected, predicted))
+# print("f1 score: %s \n" % metrics.f1_score(expected, predicted, average='weighted'))
+# print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
