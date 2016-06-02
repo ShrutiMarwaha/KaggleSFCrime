@@ -2,7 +2,7 @@ import numpy as np
 
 def data_summary(df):
     '''
-    print basic head, dimension, columnames
+    print basic head, dimension, column names
     :param df: data frame
     :return: dimension, missing data, column names, top 3 lines
     '''

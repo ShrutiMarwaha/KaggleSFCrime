@@ -95,7 +95,7 @@ modeling.gridsearch_cv_model("BernoulliNB",2,cv_features_train,cv_outcomes_train
 
 # now chose algorithm with the best parameters. And apply 10 fold Cross Validation.
 # this step can be avoided if all desired arguments and k-fold cv are used in GridSearchCV. GridSearchCV automatically refits the best model.
-algo=LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-1,random_state=0)
+algo=LogisticRegression(solver='lbfgs',multi_class='multinomial',C=100,n_jobs=-1,random_state=0)
 # algo = RandomForestClassifier(n_jobs=-1,random_state=0)
 # algo = BernoulliNB(alpha=300)
 # algo = GradientBoostingClassifier(random_state=0)
@@ -127,7 +127,7 @@ print("classification_report: %s \n" % metrics.classification_report(expected, p
 #print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
 
 ############################### final model for submission to kaggle #############################
-final_model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-1,random_state=0)
+final_model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=100,n_jobs=-1,random_state=0)
 final_model.fit(training_dummy_var, outcomes)
 
 # make predictions

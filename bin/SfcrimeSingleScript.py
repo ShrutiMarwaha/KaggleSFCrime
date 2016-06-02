@@ -1,4 +1,4 @@
-# this is same script as sfcrime.py, all the required functions are defined in a single file.
+# this is same script as sfcrime.py, all the required functions are defined in a single file for submission to kaggle.
 
 # import libraries
 import pandas as pd
@@ -16,10 +16,14 @@ from sklearn.svm import SVC
 from sklearn.naive_bayes import BernoulliNB
 from sklearn import preprocessing
 
-############################################ define all functions ############################################
+# load data
+training_set = pd.read_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/train.csv")
+test_set = pd.read_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/test.csv")
+
+# data exploration
 def data_summary(df):
     '''
-    print basic head, dimension, columnames
+    print basic head, dimension, column names
     :param df: data frame
     :return: dimension, missing data, column names, top 3 lines
     '''
@@ -28,6 +32,17 @@ def data_summary(df):
     print "columns of dataset: %s \n" % df.columns.tolist()
     print "first 3 rows: \n%s" % df.iloc[:3,:]
 
+data_summary(training_set)
+data_summary(test_set)
+
+# outcomes: classes to be predicted
+outcomes = training_set.Category
+# convert outcome classes from string to numeric
+# le_class = preprocessing.LabelEncoder()
+# outcomes = le_class.fit_transform(training_set.Category)
+# outcomes = pd.Series(outcomes)
+
+################################## feature extraction ##################################
 def extract_date_time(data_frame,colname="Dates"):
     '''
     function to extract year, month and hour from one column in data frame
@@ -45,6 +60,10 @@ def extract_date_time(data_frame,colname="Dates"):
 
     return new_dataframe
 
+training_set = extract_date_time(training_set)
+test_set = extract_date_time(test_set)
+
+################################### feature engineering ##################################
 zcdb = ZipCodeDatabase()
 sf_zipcodes = zcdb.find_zip(city="San Francisco", state="CA")
 # print(len(sf_zipcodes))
@@ -94,6 +113,14 @@ def find_zipcodes_dataframe(data_frame,long_col="X",lat_col="Y"):
     data_frame.loc[:,"zip"] = pd.Series( data_frame.apply(lambda d: long_lat_to_zipcode(d[long_col],d[lat_col]), axis=1), index=data_frame.index)
     return data_frame
 
+training_set = find_zipcodes_dataframe(training_set)
+test_set = find_zipcodes_dataframe(test_set)
+
+# remove the columns that should not be used for model building
+training_features = training_set.drop(["Category","Dates","Resolution","Descript","Address","X","Y"], axis=1)
+test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
+
+#################################### Create Dummy Variables from Categorical Data ###################################
 def create_dummy_var(df,categorical_col):
     """
     Create Dummy Variables from Categorical Data
@@ -106,6 +133,27 @@ def create_dummy_var(df,categorical_col):
 
     dummy_var_df = pd.get_dummies(df)
     return dummy_var_df
+
+# decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
+train_categorical_columns = list(training_features)
+print train_categorical_columns
+# Create Dummy Variables from Categorical Data
+training_dummy_var = create_dummy_var(training_features,train_categorical_columns)
+data_summary(training_dummy_var)
+
+test_categorical_columns = list(test_features)
+print test_categorical_columns
+#do not include first column - ID
+test_categorical_columns.remove("Id")
+test_dummy_var = create_dummy_var(test_features.drop(["Id"], axis=1),test_categorical_columns)
+data_summary(test_dummy_var)
+
+##################################### Build the model ####################################
+# Split data in to training and intermediate set
+features_train, features_intermediate, outcomes_train, outcomes_intermediate = cv.train_test_split(training_dummy_var,outcomes,test_size=0.4,random_state=0)
+# divide intermediate set into test and validation set.
+# validation set will be only used once to evaluate final model's performance
+features_test, features_validation, outcomes_test, outcomes_validation = cv.train_test_split(features_intermediate,outcomes_intermediate,test_size=0.5,random_state=0)
 
 def basic_model(mlalgo,trainingset_features,trainingset_outcomes,testset_features,testset_outcomes):
     '''
@@ -147,6 +195,29 @@ def basic_model(mlalgo,trainingset_features,trainingset_outcomes,testset_feature
     #print("auc score: %s \n" % metrics.roc_auc_score(expected, predicted)) # predicted outputs have to be binarized
     return metrics.accuracy_score(expected, predicted)
 
+# build the model
+basic_model("LogisticRegression",features_train,outcomes_train,features_test,outcomes_test)
+basic_model("RandomForestClassifier",features_train,outcomes_train,features_test,outcomes_test)
+basic_model("BernoulliNB",features_train,outcomes_train,features_test,outcomes_test)
+# basic_model("GradientBoostingClassifier",features_train,outcomes_train,features_test,outcomes_test) # takes very long
+
+###################### Grid Search with Cross Validation ######################
+# to run k-fold cross validation, remove classes which have less than "k" samples.
+# cv< minimum no.of samples in each class. So either remove such samples or use KFold
+outcomes_frequency = outcomes.value_counts(ascending=True)
+outcomes_frequency.head()
+outcomes_frequency[outcomes_frequency < 10 ]
+matchings_indices = [ i for i, value in enumerate(outcomes) if value == "TREA" ]
+# matchings_indices = [ i for i, value in enumerate(outcomes) if value == 33 ] #if outcomes very converted to numeric
+outcomes[matchings_indices]
+# remove these samples from features and outcomes data
+outcomes2 = outcomes.drop(matchings_indices)
+training_dummy_var2 = training_dummy_var.drop(matchings_indices)
+
+# divide data in to training and validation set. Since performing cross validation, no need for test set
+# validation set will be only used once to evaluate final model's performance
+cv_features_train, cv_features_validation, cv_outcomes_train, cv_outcomes_validation = cv.train_test_split(training_dummy_var2,outcomes2,test_size=0.4,random_state=0)
+
 def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
     '''
     Grid Search with Cross Validation.
@@ -185,78 +256,6 @@ def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
 
     return cv_model.best_params_
 
-
-########################################################################################
-# load data
-training_set = pd.read_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/train.csv")
-test_set = pd.read_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/test.csv")
-
-# data exploration
-data_summary(training_set)
-data_summary(test_set)
-
-# outcomes: classes to be predicted
-outcomes = training_set.Category
-# convert outcome classes from string to numeric
-# le_class = preprocessing.LabelEncoder()
-# outcomes = le_class.fit_transform(training_set.Category)
-# outcomes = pd.Series(outcomes)
-
-# feature extraction
-training_set = extract_date_time(training_set)
-test_set = extract_date_time(test_set)
-
-# feature engineering
-training_set = find_zipcodes_dataframe(training_set)
-test_set = find_zipcodes_dataframe(test_set)
-
-# remove the columns that should not be used for model building
-training_features = training_set.drop(["Category","Dates","Resolution","Descript","Address","X","Y"], axis=1)
-test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
-
-# decide which columns should be categorical and converted to dummy variables. this step cannot be automated, pay attention !!
-train_categorical_columns = list(training_features)
-print train_categorical_columns
-# Create Dummy Variables from Categorical Data
-training_dummy_var = create_dummy_var(training_features,train_categorical_columns)
-data_summary(training_dummy_var)
-
-test_categorical_columns = list(test_features)
-print test_categorical_columns
-#do not include first column - ID
-test_categorical_columns.remove("Id")
-test_dummy_var = create_dummy_var(test_features.drop(["Id"], axis=1),test_categorical_columns)
-data_summary(test_dummy_var)
-
-# divide data in to training and intermediate set
-features_train, features_intermediate, outcomes_train, outcomes_intermediate = cv.train_test_split(training_dummy_var,outcomes,test_size=0.4,random_state=0)
-# divide intermediate set into test and validation set.
-# validation set will be only used once to evaluate final model's performance
-features_test, features_validation, outcomes_test, outcomes_validation = cv.train_test_split(features_intermediate,outcomes_intermediate,test_size=0.5,random_state=0)
-
-# build the model
-basic_model("LogisticRegression",features_train,outcomes_train,features_test,outcomes_test)
-basic_model("RandomForestClassifier",features_train,outcomes_train,features_test,outcomes_test)
-basic_model("BernoulliNB",features_train,outcomes_train,features_test,outcomes_test)
-# basic_model("GradientBoostingClassifier",features_train,outcomes_train,features_test,outcomes_test) # takes very long
-
-###################### Grid Search with Cross Validation ######################
-# to run k-fold cross validation, remove classes which have less than "k" samples.
-# cv< minimum no.of samples in each class. So either remove such samples or use KFold
-outcomes_frequency = outcomes.value_counts(ascending=True)
-outcomes_frequency.head()
-outcomes_frequency[outcomes_frequency < 10 ]
-matchings_indices = [ i for i, value in enumerate(outcomes) if value == "TREA" ]
-# matchings_indices = [ i for i, value in enumerate(outcomes) if value == 33 ] #if outcomes very converted to numeric
-outcomes[matchings_indices]
-# remove these samples from features and outcomes data
-outcomes2 = outcomes.drop(matchings_indices)
-training_dummy_var2 = training_dummy_var.drop(matchings_indices)
-
-# divide data in to training and validation set. Since performing cross validation, no need for test set
-# validation set will be only used once to evaluate final model's performance
-cv_features_train, cv_features_validation, cv_outcomes_train, cv_outcomes_validation = cv.train_test_split(training_dummy_var2,outcomes2,test_size=0.4,random_state=0)
-
 # GridSearch with 10 fold CV will take very long, so running only 3 folds to find the best parameters.
 # use RandomizedSearchCV that searches a subset of the parameters to reduce computational expense
 # Look at modeling.py for parameters to vary in grid search
@@ -288,17 +287,16 @@ print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
 print("log loss: %s \n" % loss)
 
 ######### final code for submission to kaggle #######
-#model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-1,random_state=0)
-model = RandomForestClassifier(n_jobs=-1,random_state=0)
-model.fit(training_dummy_var, outcomes)
+final_model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=100,n_jobs=-1,random_state=0)
+final_model.fit(training_dummy_var, outcomes)
 
 # make predictions
-predicted_prob = model.predict_proba(test_dummy_var)
-result = pd.DataFrame(predicted_prob, columns=model.classes_)
-finalresult = pd.concat([ test_set.Id,result ], axis=1)
+predicted_prob = final_model.predict_proba(test_dummy_var)
+result = pd.DataFrame(predicted_prob, columns=final_model.classes_)
+final_result = pd.concat([ test_set.Id,result ], axis=1)
 
 pd.set_option('display.max_columns', None)
-print finalresult.head()
-print finalresult.shape
+print final_result.head()
+print final_result.shape
 
-finalresult.to_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/finalresult.csv")
+final_result.to_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/final_result.csv",index=False)

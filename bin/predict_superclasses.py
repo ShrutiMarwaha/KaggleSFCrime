@@ -1,3 +1,7 @@
+# Since classifying a crime into 39 categories is very challenging, Merge different categories of crimes into bigger classes.
+# 3 major classes of crimes by law: Felony, Misdemeanor, Infraction
+# 2 other classes of crimes: Violent crimes, Non-violent crimes
+
 # import libraries
 import pandas as pd
 from sklearn import cross_validation as cv
@@ -45,22 +49,21 @@ modeling.basic_model("BernoulliNB",features_train,outcomes_train,features_test,o
 # modeling.basic_model("SVC",features_train,outcomes_train,features_test,outcomes_test) # donot try, takes very very long
 
 # now chose algorithm with the best parameters.
-# this step can be avoided if all desired arguments are used in GridSearchCV. GridSearchCV automatically refits the best model.
-#model = LogisticRegression(solver='sag',C=1,n_jobs=-1,random_state=0)
+model = LogisticRegression(solver='sag',C=1,n_jobs=-1,random_state=0)
 # model = RandomForestClassifier(n_jobs=-1,random_state=0)
 # # # model = BernoulliNB(alpha=300)
 # # # TODO: model = GradientBoostingClassifier(random_state=0)
 # # # TODO: model = SVC(random_state=0)
-# model.fit(features_train, outcomes_train)
-#
+model.fit(features_train, outcomes_train)
+
 # # make predictions on validation set. use only once to evaluate final model's performance
-# expected = outcomes_validation
-# predicted = model.predict(features_validation)
-# predicted_prob = model.predict_proba(features_validation)
+expected = outcomes_validation
+predicted = model.predict(features_validation)
+predicted_prob = model.predict_proba(features_validation)
 
 # # summarize the fit of the model
-# print("log loss: %s \n" % metrics.log_loss(expected, predicted_prob))
-# print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
-# print("classification_report: %s \n" % metrics.classification_report(expected, predicted))
-# print("f1 score: %s \n" % metrics.f1_score(expected, predicted, average='weighted'))
-# print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
+print("log loss: %s \n" % metrics.log_loss(expected, predicted_prob))
+print("accuracy score: %s \n" % metrics.accuracy_score(expected, predicted))
+print("classification_report: %s \n" % metrics.classification_report(expected, predicted))
+print("f1 score: %s \n" % metrics.f1_score(expected, predicted, average='weighted'))
+print("confusion matrix: %s \n" % metrics.confusion_matrix(expected, predicted))
