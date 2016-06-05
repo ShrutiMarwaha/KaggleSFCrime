@@ -81,7 +81,7 @@ training_dummy_var2 = training_dummy_var.drop(matchings_indices)
 
 # divide data in to training and validation set. Since performing cross validation, no need for test set
 # validation set will be only used once to evaluate final model's performance
-cv_features_train, cv_features_validation, cv_outcomes_train, cv_outcomes_validation = cv.train_test_split(training_dummy_var2,outcomes2,test_size=0.4,random_state=0)
+cv_features_train, cv_features_validation, cv_outcomes_train, cv_outcomes_validation = cv.train_test_split(training_dummy_var2,outcomes2,test_size=0.2,random_state=0)
 print(cv_features_train.shape)
 print(cv_features_validation.shape)
 
@@ -98,7 +98,7 @@ modeling.gridsearch_cv_model("BernoulliNB",2,cv_features_train,cv_outcomes_train
 algo=LogisticRegression(solver='lbfgs',multi_class='multinomial',C=100,n_jobs=-1,random_state=0)
 # algo = RandomForestClassifier(n_jobs=-1,random_state=0)
 # algo = BernoulliNB(alpha=300)
-# algo = GradientBoostingClassifier(random_state=0)
+# algo = GradientBoostingClassifier(random_state=0,verbose=1,learning_rate=0.1)
 cvmodel_accuracy = cv.cross_val_score(estimator=algo, X=cv_features_train, y=cv_outcomes_train, cv=10, scoring='accuracy')
 print "average accuracy score for cross validation %s: \n" % cvmodel_accuracy.mean()
 # use 'f1_weighted' as scoring metric because this data has unbalanced classes
@@ -111,7 +111,7 @@ print "average log-loss score for cross validation %s: \n" % cvmodel_logloss.mea
 model = RandomForestClassifier(n_jobs=-1,random_state=0)
 # model = LogisticRegression(solver='lbfgs',multi_class='multinomial',C=1,n_jobs=-1,random_state=0)
 # model = BernoulliNB(alpha=300)
-# model = GradientBoostingClassifier(random_state=0)
+# model = GradientBoostingClassifier(random_state=0,verbose=1,learning_rate=0.1)
 model.fit(cv_features_train, cv_outcomes_train)
 
 # make predictions on validation set. use it only once to evaluate final model's performance
@@ -140,3 +140,5 @@ print final_result.head()
 print final_result.shape
 
 final_result.to_csv("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/Datasets/final_result.csv",index=False)
+
+

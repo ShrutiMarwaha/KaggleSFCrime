@@ -40,7 +40,7 @@ def basic_model(mlalgo,trainingset_features,trainingset_outcomes,testset_feature
     elif mlalgo=="SVC":
         model = SVC()
     elif mlalgo=="GradientBoostingClassifier":
-        model = GradientBoostingClassifier(random_state=0)
+        model = GradientBoostingClassifier(random_state=0,verbose=1)
     elif mlalgo=="RandomForestClassifier":
         model=RandomForestClassifier(n_jobs=-1,random_state=0)
     else:
@@ -80,7 +80,7 @@ def gridsearch_cv_model(mlalgo,folds,trainingset_features,trainingset_outcomes):
         algo = SVC()
         param_grid = {'C': [0.1, 1, 10]}
     elif mlalgo=="GradientBoostingClassifier":
-        algo = GradientBoostingClassifier(random_state=0)
+        algo = GradientBoostingClassifier(random_state=0,verbose=1)
         #param_grid = {'learning_rate': [0.1,1,10], 'max_depth': [3,10,15], 'n_estimators': [100, 500, 1000], 'max_features': ['sqrt','log2']}
         param_grid = {'learning_rate': [0.1,1,10]}
     elif mlalgo=="RandomForestClassifier":
