@@ -24,8 +24,6 @@ analysis.data_summary(test_set)
 
 # outcomes: classes to be predicted
 outcomes = training_set.Category
-# save file for future use
-# outcomes.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
 outcomes_frequency = outcomes.value_counts(ascending=True)
 print "number of samples in each class: \n%s" % outcomes_frequency.head()
 
@@ -46,11 +44,12 @@ test_features = test_set.drop(["Dates","Address","X","Y"], axis=1)
 # save files for future use
 # training_features.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
 # test_features.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test_features.pkl")
+# outcomes.to_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
 
 # directly load following files and skip all above commands than import libraries
 # training_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/training_features.pkl")
-# outcomes = outcomes = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
 # test_features = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/test_features.pkl")
+# outcomes = outcomes = pd.read_pickle("/Users/shruti/Desktop/WorkMiscellaneous/MachineLearning/SanFranciscoCrime/outcomes.pkl")
 
 # Create Dummy Variables from Categorical Data
 train_categorical_columns = list(training_features)
@@ -70,7 +69,6 @@ analysis.data_summary(test_dummy_var)
 ###################### Grid Search with Cross Validation ######################
 # to run k-fold cross validation, remove classes which have less than "k" samples.
 # cv< minimum no.of samples in each class. So either remove such samples or use KFold
-# outcomes_frequency = outcomes.value_counts(ascending=True)
 outcomes_frequency.head()
 outcomes_frequency[outcomes_frequency < 10 ]
 matchings_indices = [ i for i, value in enumerate(outcomes) if value == "TREA" ]
@@ -85,12 +83,11 @@ cv_features_train, cv_features_validation, cv_outcomes_train, cv_outcomes_valida
 print(cv_features_train.shape)
 print(cv_features_validation.shape)
 
-# GridSearch with 10 fold CV will take very long, so running only 2 folds to find the best parameters.
 # use RandomizedSearchCV that searches a subset of the parameters to reduce computational expense
 # Look at modeling.py for parameters to vary in grid search
-modeling.gridsearch_cv_model("LogisticRegression",2,cv_features_train,cv_outcomes_train)
-modeling.gridsearch_cv_model("RandomForestClassifier",2,cv_features_train,cv_outcomes_train)
-modeling.gridsearch_cv_model("BernoulliNB",2,cv_features_train,cv_outcomes_train)
+modeling.gridsearch_cv_model("LogisticRegression",10,cv_features_train,cv_outcomes_train)
+modeling.gridsearch_cv_model("RandomForestClassifier",10,cv_features_train,cv_outcomes_train)
+modeling.gridsearch_cv_model("BernoulliNB",10,cv_features_train,cv_outcomes_train)
 # modeling.gridsearch_cv_model("GradientBoostingClassifier",2,cv_features_train,cv_outcomes_train) #takes very very long
 
 # now chose algorithm with the best parameters. And apply 10 fold Cross Validation.
